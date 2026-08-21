@@ -1,0 +1,170 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum Role {
+  BUYER
+  SELLER
+  MANAGER
+}
+
+enum UserStatus {
+  ACTIVE
+  SUSPENDED
+}
+
+enum AssetStatus {
+  ACTIVE
+  SUSPENDED
+  REMOVED
+}
+
+enum Sector {
+  TECHNOLOGY
+  HEALTHCARE
+  MANUFACTURING
+  FINANCIAL_SERVICES
+  REAL_ESTATE
+  ENERGY
+  RETAIL
+  OTHER
+}
+
+enum Region {
+  NORTH_AMERICA
+  EUROPE
+  APAC
+  LATAM
+  MEA
+  GLOBAL
+}
+
+model User {
+  id           Int        @id @default(autoincrement())
+  email        String     @unique
+  passwordHash String
+  role         Role
+  name         String
+  company      String?
+  phone        String?
+  status       UserStatus @default(ACTIVE)
+  statusReason String?
+  statusChangedAt DateTime?
+  createdAt    DateTime   @default(now())
+  updatedAt    DateTime   @updatedAt
+
+  buyerProfile      BuyerProfile?
+  assets            Asset[]          @relation("SellerAssets")
+  conversationsAsBuyer  Conversation[] @relation("BuyerConversations")
+  conversationsAsSeller Conversation[] @relation("SellerConversations")
+  messages          Message[]
+  favorites         Favorite[]
+
+  @@index([role])
+  @@index([status])
+}
+
+model BuyerProfile {
+  userId            Int      @id
+  investmentThesis  String   @db.Text
+  ticketSizeMin     Int
+  ticketSizeMax     Int
+  updatedAt         DateTime @updatedAt
+
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  sectors BuyerSector[]
+  regions BuyerRegion[]
+}
+
+model BuyerSector {
+  id             Int    @id @default(autoincrement())
+  buyerProfileId Int
+  sector         Sector
+
+  buyerProfile BuyerProfile @relation(fields: [buyerProfileId], references: [userId], onDelete: Cascade)
+
+  @@unique([buyerProfileId, sector])
+}
+
+model BuyerRegion {
+  id             Int    @id @default(autoincrement())
+  buyerProfileId Int
+  region         Region
+
+  buyerProfile BuyerProfile @relation(fields: [buyerProfileId], references: [userId], onDelete: Cascade)
+
+  @@unique([buyerProfileId, region])
+}
+
+model Asset {
+  id           Int         @id @default(autoincrement())
+  sellerId     Int
+  title        String
+  description  String      @db.Text
+  sector       Sector
+  region       Region
+  dealSize     Int
+  revenue      Int?
+  ebitda       Int?
+  status       AssetStatus @default(ACTIVE)
+  statusReason String?
+  statusChangedAt DateTime?
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  seller        User           @relation("SellerAssets", fields: [sellerId], references: [id], onDelete: Cascade)
+  conversations Conversation[]
+  favorites     Favorite[]
+
+  @@index([sector])
+  @@index([region])
+  @@index([status])
+}
+
+model Favorite {
+  id        Int      @id @default(autoincrement())
+  buyerId   Int
+  assetId   Int
+  createdAt DateTime @default(now())
+
+  buyer User  @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerId, assetId])
+}
+
+model Conversation {
+  id             Int      @id @default(autoincrement())
+  buyerId        Int
+  sellerId       Int
+  assetId        Int?
+  createdAt      DateTime @default(now())
+  lastMessageAt  DateTime @default(now())
+
+  buyer    User      @relation("BuyerConversations", fields: [buyerId], references: [id], onDelete: Cascade)
+  seller   User      @relation("SellerConversations", fields: [sellerId], references: [id], onDelete: Cascade)
+  asset    Asset?    @relation(fields: [assetId], references: [id], onDelete: SetNull)
+  messages Message[]
+
+  @@unique([buyerId, sellerId, assetId])
+}
+
+model Message {
+  id             Int       @id @default(autoincrement())
+  conversationId Int
+  senderId       Int
+  body           String    @db.Text
+  createdAt      DateTime  @default(now())
+  readAt         DateTime?
+
+  conversation Conversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
+  sender       User         @relation(fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([conversationId])
+  @@index([conversationId, readAt])
+}

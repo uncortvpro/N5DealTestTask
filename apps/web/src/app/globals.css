@@ -1,0 +1,81 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html,
+body {
+  @apply bg-navy-50 text-navy-900;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+}
+
+/*
+ * Plain CSS animations for the Dialog component — triggered automatically
+ * by DOM insertion, not by a React/rAF state machine. That's deliberate:
+ * an enter transition driven by useState+requestAnimationFrame can lose
+ * the race against React's commit/paint timing and flash instead of
+ * fading, especially with multiple dialogs on one page. CSS animations on
+ * mount don't have that race.
+ */
+@keyframes dialog-overlay-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes dialog-panel-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+/* Landing page decorative motion — all plain CSS, triggered by mount or
+   looping indefinitely, so none of it depends on JS render timing. */
+@keyframes hero-fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(16px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes float-slow {
+  0%,
+  100% {
+    transform: translateY(0) rotate(var(--float-rotate, 0deg));
+  }
+  50% {
+    transform: translateY(-14px) rotate(var(--float-rotate, 0deg));
+  }
+}
+
+@keyframes glow-pulse {
+  0%,
+  100% {
+    opacity: 0.2;
+    transform: translate(var(--glow-tx, -50%), var(--glow-ty, 0)) scale(1);
+  }
+  50% {
+    opacity: 0.32;
+    transform: translate(var(--glow-tx, -50%), var(--glow-ty, 0)) scale(1.08);
+  }
+}

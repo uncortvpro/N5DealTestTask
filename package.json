@@ -1,0 +1,17 @@
+{
+  "name": "n5deal-prototype",
+  "private": true,
+  "version": "0.1.0",
+  "scripts": {
+    "build:shared": "pnpm --filter @n5deal/shared build",
+    "dev:web": "pnpm --filter @n5deal/web dev",
+    "dev:api": "pnpm --filter @n5deal/api dev",
+    "build": "pnpm --filter @n5deal/shared build && pnpm --filter @n5deal/api build && pnpm --filter @n5deal/web build",
+    "test": "pnpm --filter @n5deal/api test",
+    "lint": "pnpm -r lint"
+  },
+  "packageManager": "pnpm@9.15.9",
+  "engines": {
+    "node": ">=20"
+  }
+}
