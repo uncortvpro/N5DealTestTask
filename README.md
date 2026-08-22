@@ -90,7 +90,7 @@ It's used in both directions: buyers see assets ranked and badged by fit against
 
 ## AI tools used
 
-Built end-to-end with **Claude Code** (Sonnet 5): architecture and data-model design, the Express API and Prisma schema, the Next.js frontend, Docker multi-stage builds, the match-score algorithm and its tests, and this README. I drove the process interactively — reviewed the generated schema and route logic, ran the type-checker/test suite/Docker build myself and fixed the issues that came up (config caching in `next.config.mjs`, a missing `.dockerignore`, a couple of Prisma/TypeScript friction points), rather than accepting output unreviewed.
+Built with **Claude Code** (Sonnet 5) as the implementation tool, directed interactively end-to-end: I made the architecture and product decisions, drove every iteration (from initial scope through UX polish, code review, and production deployment), reviewed and redirected the output at every step, and made the calls on what to build, fix, and prioritize. Claude Code wrote the code, ran its own verification (type-checking, tests, Docker builds, regression checks) before reporting progress, and iterated based on my feedback — including from screenshots when something looked or worked wrong.
 
 ## What I'd improve with more time
 
