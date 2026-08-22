@@ -1,28 +1,17 @@
 "use client";
 
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
-import { useTransition } from "react";
 import { SlidersHorizontal } from "lucide-react";
 import { Button } from "@/components/ui/Button";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { KeywordFilterField } from "@/components/KeywordFilterField";
+import { useFilterParams } from "@/hooks/useFilterParams";
 
 export function ManagerFilterBar({
   statusOptions,
 }: {
   statusOptions: { value: string; label: string }[];
 }) {
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
-  const [isPending, startTransition] = useTransition();
-
-  function updateParam(key: string, value: string) {
-    const params = new URLSearchParams(searchParams.toString());
-    if (value) params.set(key, value);
-    else params.delete(key);
-    startTransition(() => router.push(`${pathname}?${params.toString()}`));
-  }
+  const { searchParams, isPending, updateParam, clear } = useFilterParams();
 
   return (
     <div className="rounded-xl border border-navy-100 bg-white p-4 shadow-sm">
@@ -46,7 +35,7 @@ export function ManagerFilterBar({
             onChange={(v) => updateParam("status", v)}
           />
         </div>
-        <Button type="button" variant="outline" onClick={() => router.push(pathname)}>
+        <Button type="button" variant="outline" onClick={clear}>
           Clear
         </Button>
       </div>

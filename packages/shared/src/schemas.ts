@@ -65,6 +65,21 @@ export const buyerFilterSchema = z.object({
 });
 export type BuyerFilterInput = z.infer<typeof buyerFilterSchema>;
 
+export const managerUserFilterSchema = z.object({
+  role: z.enum(["BUYER", "SELLER"]).optional(),
+  status: z.enum(["ACTIVE", "SUSPENDED"]).optional(),
+  keyword: z.string().max(200).optional(),
+});
+export type ManagerUserFilterInput = z.infer<typeof managerUserFilterSchema>;
+
+export const managerAssetFilterSchema = z.object({
+  status: z.enum(["ACTIVE", "SUSPENDED", "REMOVED"]).optional(),
+  sector: z.enum(SECTORS).optional(),
+  region: z.enum(REGIONS).optional(),
+  keyword: z.string().max(200).optional(),
+});
+export type ManagerAssetFilterInput = z.infer<typeof managerAssetFilterSchema>;
+
 export const statusUpdateSchema = z
   .object({
     status: z.enum(["ACTIVE", "SUSPENDED", "REMOVED"]),

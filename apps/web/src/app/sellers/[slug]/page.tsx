@@ -30,7 +30,10 @@ export default async function SellerDetailPage({ params }: { params: { slug: str
   if (!sellerResult.ok) notFound();
 
   const { seller } = sellerResult.data;
-  const listings = listingsResult.data.assets.map((a) => ({ ...a, matchScore: null }));
+  const listings = (listingsResult.ok ? listingsResult.data.assets : []).map((a) => ({
+    ...a,
+    matchScore: null,
+  }));
   const portfolioValue = listings.reduce((sum, a) => sum + a.dealSize, 0);
   const back = user ? BACK_LINK[user.role] : undefined;
 

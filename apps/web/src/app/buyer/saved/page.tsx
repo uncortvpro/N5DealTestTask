@@ -4,7 +4,8 @@ import { AssetCard } from "@/components/AssetCard";
 import { EmptyState } from "@/components/EmptyState";
 
 export default async function SavedListingsPage() {
-  const { data } = await apiFetch<{ assets: AssetWithScore[] }>("/api/favorites");
+  const result = await apiFetch<{ assets: AssetWithScore[] }>("/api/favorites");
+  const assets = result.ok ? result.data.assets : [];
 
   return (
     <div className="space-y-6">
@@ -15,14 +16,14 @@ export default async function SavedListingsPage() {
         </p>
       </div>
 
-      {data.assets.length === 0 ? (
+      {assets.length === 0 ? (
         <EmptyState
           title="Nothing saved yet"
           description="Tap the star on any listing to keep track of it here."
         />
       ) : (
         <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {data.assets.map((asset) => (
+          {assets.map((asset) => (
             <AssetCard key={asset.id} asset={asset} />
           ))}
         </div>

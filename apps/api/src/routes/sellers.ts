@@ -12,7 +12,10 @@ sellersRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    const seller = await prisma.user.findFirst({ where: { id, role: "SELLER" } });
+    const isManager = req.currentUser!.role === "MANAGER";
+    const seller = await prisma.user.findFirst({
+      where: { id, role: "SELLER", ...(isManager ? {} : { status: "ACTIVE" }) },
+    });
     if (!seller) return res.status(404).json({ error: "Seller not found" });
 
     res.json({ seller: toPublicUser(seller) });

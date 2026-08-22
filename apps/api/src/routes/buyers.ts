@@ -28,8 +28,14 @@ buyersRouter.get(
               ],
             }
           : {}),
-        ...(filters.sector ? { buyerProfile: { sectors: { some: { sector: filters.sector } } } } : {}),
-        ...(filters.region ? { buyerProfile: { regions: { some: { region: filters.region } } } } : {}),
+        ...(filters.sector || filters.region
+          ? {
+              buyerProfile: {
+                ...(filters.sector ? { sectors: { some: { sector: filters.sector } } } : {}),
+                ...(filters.region ? { regions: { some: { region: filters.region } } } : {}),
+              },
+            }
+          : {}),
       },
       include: { buyerProfile: { include: { sectors: true, regions: true } } },
       orderBy: { createdAt: "desc" },
@@ -74,8 +80,9 @@ buyersRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
+    const isManager = req.currentUser!.role === "MANAGER";
     const buyer = await prisma.user.findFirst({
-      where: { id, role: "BUYER" },
+      where: { id, role: "BUYER", ...(isManager ? {} : { status: "ACTIVE" }) },
       include: { buyerProfile: { include: { sectors: true, regions: true } } },
     });
     if (!buyer) return res.status(404).json({ error: "Buyer not found" });

@@ -1,5 +1,5 @@
 import { Router } from "express";
-import { statusUpdateSchema } from "@n5deal/shared";
+import { managerAssetFilterSchema, managerUserFilterSchema, statusUpdateSchema } from "@n5deal/shared";
 import type { Prisma } from "@prisma/client";
 import { prisma } from "../db";
 import { asyncHandler } from "../lib/asyncHandler";
@@ -42,10 +42,10 @@ managerRouter.get(
 managerRouter.get(
   "/users",
   asyncHandler(async (req, res) => {
-    const { role, status, keyword } = req.query as Record<string, string | undefined>;
+    const { role, status, keyword } = managerUserFilterSchema.parse(req.query);
     const where: Prisma.UserWhereInput = { role: { in: ["BUYER", "SELLER"] } };
-    if (role === "BUYER" || role === "SELLER") where.role = role;
-    if (status === "ACTIVE" || status === "SUSPENDED") where.status = status;
+    if (role) where.role = role;
+    if (status) where.status = status;
     if (keyword) {
       where.OR = [
         { name: { contains: keyword } },
@@ -101,11 +101,11 @@ managerRouter.patch(
 managerRouter.get(
   "/assets",
   asyncHandler(async (req, res) => {
-    const { status, sector, region, keyword } = req.query as Record<string, string | undefined>;
+    const { status, sector, region, keyword } = managerAssetFilterSchema.parse(req.query);
     const where: Prisma.AssetWhereInput = {};
-    if (status === "ACTIVE" || status === "SUSPENDED" || status === "REMOVED") where.status = status;
-    if (sector) where.sector = sector as Prisma.AssetWhereInput["sector"];
-    if (region) where.region = region as Prisma.AssetWhereInput["region"];
+    if (status) where.status = status;
+    if (sector) where.sector = sector;
+    if (region) where.region = region;
     if (keyword) {
       where.OR = [{ title: { contains: keyword } }, { description: { contains: keyword } }];
     }

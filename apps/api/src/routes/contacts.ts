@@ -161,6 +161,12 @@ contactsRouter.post(
       return res.status(404).json({ error: "Conversation not found" });
     }
 
+    const counterpartId = me.role === "BUYER" ? conversation.sellerId : conversation.buyerId;
+    const counterpart = await prisma.user.findUnique({ where: { id: counterpartId } });
+    if (!counterpart || counterpart.status !== "ACTIVE") {
+      return res.status(403).json({ error: "This account is no longer active" });
+    }
+
     const data = parseBody(sendMessageSchema, req.body, res);
     if (!data) return;
 

@@ -6,11 +6,12 @@ import type { ConversationSummary } from "@/components/contacts/ConversationList
 
 export default async function ContactsLayout({ children }: { children: React.ReactNode }) {
   const user = await requireSession(["BUYER", "SELLER"]);
-  const { data } = await apiFetch<{ conversations: ConversationSummary[] }>("/api/contacts");
+  const result = await apiFetch<{ conversations: ConversationSummary[] }>("/api/contacts");
+  const conversations = result.ok ? result.data.conversations : [];
 
   return (
     <AppShell user={user}>
-      <ContactsShell conversations={data.conversations}>{children}</ContactsShell>
+      <ContactsShell conversations={conversations}>{children}</ContactsShell>
     </AppShell>
   );
 }

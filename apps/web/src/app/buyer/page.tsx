@@ -29,8 +29,8 @@ export default async function BuyerDashboardPage({
     apiFetch<MatchResponse>(`/api/match/assets?${params.toString()}`),
   ]);
 
-  const overview = overviewResult.data;
-  const data = results.data;
+  const overview = overviewResult.ok ? overviewResult.data : { assets: [], hasProfile: false };
+  const data = results.ok ? results.data : { assets: [], hasProfile: false };
   const sectorCount = new Set(overview.assets.map((a) => a.sector)).size;
   const topMatchCount = overview.assets.filter((a) => (a.matchScore ?? 0) >= 70).length;
 

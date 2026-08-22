@@ -47,4 +47,37 @@ describe("authorization guards", () => {
     const res = await request(app).get("/api/does-not-exist");
     expect(res.status).toBe(404);
   });
+
+  it("rejects a MANAGER hitting buyer-only /api/buyer/profile with 403", async () => {
+    const res = await request(app)
+      .get("/api/buyer/profile")
+      .set("Cookie", sessionCookie(4, "MANAGER"));
+    expect(res.status).toBe(403);
+  });
+
+  it("rejects a MANAGER hitting the buyer/seller-only contacts inbox with 403", async () => {
+    const res = await request(app)
+      .get("/api/contacts")
+      .set("Cookie", sessionCookie(5, "MANAGER"));
+    expect(res.status).toBe(403);
+  });
+
+  it("rejects an unauthenticated attempt to publish a listing with 401", async () => {
+    const res = await request(app)
+      .post("/api/assets")
+      .send({ title: "Test", description: "irrelevant", sector: "TECHNOLOGY", region: "GLOBAL", dealSize: 1 });
+    expect(res.status).toBe(401);
+  });
+
+  it("rejects unauthenticated requests to /api/favorites with 401", async () => {
+    const res = await request(app).get("/api/favorites");
+    expect(res.status).toBe(401);
+  });
+
+  it("rejects a SELLER hitting buyer-only /api/favorites with 403", async () => {
+    const res = await request(app)
+      .get("/api/favorites")
+      .set("Cookie", sessionCookie(7, "SELLER"));
+    expect(res.status).toBe(403);
+  });
 });

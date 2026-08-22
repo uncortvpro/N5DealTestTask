@@ -92,9 +92,10 @@ Built end-to-end with **Claude Code** (Sonnet 5): architecture and data-model de
 
 ## What I'd improve with more time
 
+- **LLM-generated match explanations.** The "Why this matches" card currently shows three deterministic sub-scores (sector/region/deal-size fit) as bars. The natural next step is a real LLM call that turns the buyer profile + listing into a one- or two-sentence rationale ("Fits because you're looking for recurring-revenue SaaS in North America, and this one has 90% net revenue retention with a founder seeking a full exit") — genuine AI reasoning layered on top of the deterministic score, not just another weighted feature.
+- **Semantic matching via embeddings.** Sector/region matching today is enum-based, so a buyer thesis written as "vertical SaaS for logistics" won't match a listing described as "niche software platform for freight operators" even though they're a strong fit. Embedding `investmentThesis` and `description`, then blending cosine similarity into the existing score, would catch fits the categorical fields miss — a meaningfully different matching approach from rule-based weights, not just a bigger version of the same thing.
 - **LLM-powered natural-language search** ("SaaS companies in Europe under $10M") that parses free text into the existing filter set, layered on top of the deterministic match score.
 - **Blind/anonymized listings** — reveal seller identity only after both sides opt in, closer to real M&A marketplace conventions.
-- **Asset editing UI** for sellers (the API already supports `PATCH /api/assets/:id`; only the publish form is wired up in the UI).
 - **Real-time messaging** (WebSocket/SSE) — the inbox currently polls every 5s (`ContactsShell.tsx`, paused when the tab is hidden) rather than pushing updates, which was the pragmatic choice for the assignment's time box.
 - **i18n** (EN/RU), pagination for large result sets, an audit log for manager actions, and a leaner production Docker image (the current runtime stage keeps devDependencies for simplicity — see comment in `docker/Dockerfile.api`).
 - **Automated end-to-end tests** (Playwright) covering full user journeys in the browser, on top of the current API-level unit/integration suite.
@@ -105,4 +106,4 @@ Built end-to-end with **Claude Code** (Sonnet 5): architecture and data-model de
 pnpm test   # from repo root or apps/api — Vitest
 ```
 
-Covers the match-score algorithm (perfect/zero/partial-credit/edge cases), zod schema validation, and authorization-guard behavior (401 unauthenticated, 403 wrong role) — all without needing a live database.
+48 tests across four files, all without needing a live database: the match-score algorithm (perfect/zero/partial-credit/edge cases), zod schema validation for every request-body schema (including the `.strict()` mass-assignment guard and business rules like "MANAGER isn't a self-registerable role"), the pretty-URL slug helpers (`slugify` / `toSlugPath` / `idFromSlugPath`, including their round-trip), and authorization-guard behavior (401 unauthenticated, 403 wrong role) across every router. Route tests are deliberately scoped to paths that fail before touching Prisma — `requireAuth`/`requireRole` run ahead of any DB call on most routers, so the guard itself is what's under test, not a live connection.

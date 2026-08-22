@@ -9,12 +9,13 @@ import { SellerListingsBanner } from "@/components/SellerListingsBanner";
 import { SellerListingRow } from "@/components/SellerListingRow";
 
 export default async function SellerListingsPage() {
-  const [user, { data }] = await Promise.all([
+  const [user, result] = await Promise.all([
     getSession(),
     apiFetch<{ assets: Asset[] }>("/api/assets?mine=true"),
   ]);
 
-  const activeAssets = data.assets.filter((a) => a.status === "ACTIVE");
+  const assets = result.ok ? result.data.assets : [];
+  const activeAssets = assets.filter((a) => a.status === "ACTIVE");
   const portfolioValue = activeAssets.reduce((sum, a) => sum + a.dealSize, 0);
 
   return (
@@ -22,7 +23,7 @@ export default async function SellerListingsPage() {
       {user && (
         <SellerListingsBanner
           name={user.name}
-          total={data.assets.length}
+          total={assets.length}
           active={activeAssets.length}
           portfolioValue={portfolioValue}
         />
@@ -41,14 +42,14 @@ export default async function SellerListingsPage() {
         </Link>
       </div>
 
-      {data.assets.length === 0 ? (
+      {assets.length === 0 ? (
         <EmptyState
           title="You haven't published any listings yet"
           description="Publish your first asset to start reaching buyers."
         />
       ) : (
         <div className="space-y-3">
-          {data.assets.map((asset) => (
+          {assets.map((asset) => (
             <SellerListingRow key={asset.id} asset={asset} />
           ))}
         </div>

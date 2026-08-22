@@ -27,6 +27,10 @@ assetsRouter.get(
       where.sellerId = req.currentUser!.id;
     } else {
       where.status = "ACTIVE";
+      where.seller = { status: "ACTIVE" };
+      if (req.query.sellerId) {
+        where.sellerId = Number(req.query.sellerId);
+      }
     }
 
     if (filters.sector) where.sector = filters.sector;
@@ -42,10 +46,6 @@ assetsRouter.get(
         { title: { contains: filters.keyword } },
         { description: { contains: filters.keyword } },
       ];
-    }
-    if (req.query.sellerId) {
-      where.sellerId = Number(req.query.sellerId);
-      if (!mine) where.status = "ACTIVE";
     }
     if (req.query.excludeId) {
       where.id = { not: Number(req.query.excludeId) };
@@ -84,7 +84,7 @@ assetsRouter.get(
 
     const isOwner = asset.sellerId === req.currentUser!.id;
     const isManager = req.currentUser!.role === "MANAGER";
-    if (asset.status !== "ACTIVE" && !isOwner && !isManager) {
+    if (!isOwner && !isManager && (asset.status !== "ACTIVE" || asset.seller.status !== "ACTIVE")) {
       return res.status(404).json({ error: "Asset not found" });
     }
 
@@ -134,6 +134,9 @@ assetsRouter.patch(
     if (!existing) return res.status(404).json({ error: "Asset not found" });
     if (existing.sellerId !== req.currentUser!.id) {
       return res.status(403).json({ error: "You do not own this listing" });
+    }
+    if (existing.status === "REMOVED") {
+      return res.status(403).json({ error: "This listing has been removed and can no longer be edited" });
     }
 
     const data = parseBody(assetInputSchema.partial(), req.body, res);

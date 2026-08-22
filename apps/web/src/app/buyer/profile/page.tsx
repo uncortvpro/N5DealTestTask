@@ -32,21 +32,26 @@ export default async function BuyerProfilePage() {
 
   if (!user) redirect("/login");
 
+  const profile = profileResult.ok ? profileResult.data.profile : null;
+  const conversations = contactsResult.ok ? contactsResult.data.conversations : [];
+  const match = matchResult.ok ? matchResult.data : { hasProfile: false, assets: [] };
+  const savedCount = favoritesResult.ok ? favoritesResult.data.assets.length : 0;
+
   return (
     <div className="mx-auto max-w-5xl space-y-6">
-      <ProfileHeader user={user} profileComplete={Boolean(profileResult.data.profile)} />
+      <ProfileHeader user={user} profileComplete={Boolean(profile)} />
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
         <div className="space-y-6 lg:col-span-2">
-          <ProfileCriteriaCard profile={profileResult.data.profile} />
-          <RecentConversationsCard conversations={contactsResult.data.conversations} />
+          <ProfileCriteriaCard profile={profile} />
+          <RecentConversationsCard conversations={conversations} />
         </div>
 
         <div className="space-y-6">
           <MatchSnapshotCard
-            hasProfile={matchResult.data.hasProfile}
-            assets={matchResult.data.assets}
-            savedCount={favoritesResult.data.assets.length}
+            hasProfile={match.hasProfile}
+            assets={match.assets}
+            savedCount={savedCount}
           />
         </div>
       </div>
