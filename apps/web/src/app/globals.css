@@ -18,13 +18,14 @@ html {
 }
 
 /* iOS Safari auto-zooms the page on focus if a text input's font-size is
-   below 16px — our fields use text-sm (14px). Bumping just the rendered
-   font-size on mobile avoids the zoom without touching every component. */
+   below 16px — our fields use text-sm (14px). A bare element selector here
+   loses to Tailwind's .text-sm class (higher specificity) regardless of
+   media query or source order, so this needs !important to actually win. */
 @media (max-width: 767px) {
   input,
   select,
   textarea {
-    font-size: 16px;
+    font-size: 16px !important;
   }
 }
 
