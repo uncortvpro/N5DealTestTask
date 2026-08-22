@@ -87,7 +87,7 @@ export default async function AssetDetailPage({ params }: { params: { slug: stri
       </Link>
 
       <div className="grid grid-cols-1 items-start gap-6 lg:grid-cols-3">
-        <div className="lg:col-span-2">
+        <div className="space-y-6 lg:col-span-2">
           <Card>
             <CardBody className="space-y-6">
               <div className="flex flex-wrap items-start justify-between gap-4">
@@ -169,6 +169,8 @@ export default async function AssetDetailPage({ params }: { params: { slug: stri
               )}
             </CardBody>
           </Card>
+
+          {asset.matchBreakdown && <MatchBreakdownCard breakdown={asset.matchBreakdown} />}
         </div>
 
         <div className="space-y-6">
@@ -190,8 +192,6 @@ export default async function AssetDetailPage({ params }: { params: { slug: stri
               }
             />
           )}
-
-          {asset.matchBreakdown && <MatchBreakdownCard breakdown={asset.matchBreakdown} />}
         </div>
       </div>
 

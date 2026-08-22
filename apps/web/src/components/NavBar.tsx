@@ -81,10 +81,10 @@ export function NavBar({ user, unreadCount = 0 }: { user: PublicUser; unreadCoun
                   href={item.href}
                   className={cn(
                     "flex items-center gap-1.5 rounded-full px-3.5 py-2 text-sm font-medium text-navy-500 transition-colors hover:bg-navy-50 hover:text-navy-900",
-                    active && "bg-navy-950 text-white hover:bg-navy-950 hover:text-white"
+                    active && "bg-gold-50 text-navy-950 ring-1 ring-inset ring-gold-400/40 hover:bg-gold-50 hover:text-navy-950"
                   )}
                 >
-                  {item.icon && <item.icon size={14} className={active ? "text-gold-300" : ""} />}
+                  {item.icon && <item.icon size={14} className={active ? "text-gold-600" : ""} />}
                   {item.label}
                   {item.href === "/contacts" && unreadCount > 0 && (
                     <UnreadBadge count={unreadCount} />
@@ -115,10 +115,10 @@ export function NavBar({ user, unreadCount = 0 }: { user: PublicUser; unreadCoun
               href={item.href}
               className={cn(
                 "flex items-center gap-1.5 whitespace-nowrap rounded-full px-3.5 py-1.5 text-sm font-medium text-navy-600 hover:bg-navy-50",
-                active && "bg-navy-950 text-white"
+                active && "bg-gold-50 text-navy-950 ring-1 ring-inset ring-gold-400/40"
               )}
             >
-              {item.icon && <item.icon size={13} className={active ? "text-gold-300" : ""} />}
+              {item.icon && <item.icon size={13} className={active ? "text-gold-600" : ""} />}
               {item.label}
               {item.href === "/contacts" && unreadCount > 0 && <UnreadBadge count={unreadCount} />}
             </Link>

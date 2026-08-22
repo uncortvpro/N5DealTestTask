@@ -9,7 +9,7 @@ export function MatchBreakdownCard({ breakdown }: { breakdown: MatchBreakdown })
         <h2 className="text-sm font-semibold text-navy-950">Why this matches</h2>
         <p className="mt-0.5 text-xs text-navy-400">Scored against your investment profile</p>
       </CardHeader>
-      <CardBody className="space-y-4">
+      <CardBody className="grid grid-cols-1 gap-4 sm:grid-cols-3">
         <BreakdownRow label="Sector fit" ratio={breakdown.sectorMatch ? 1 : 0} />
         <BreakdownRow label="Region fit" ratio={breakdown.regionMatch ? 1 : 0} />
         <BreakdownRow label="Deal size fit" ratio={breakdown.sizeFitRatio} />

@@ -47,7 +47,7 @@ export function MatchScoreShowcase() {
                   B2B SaaS Analytics Platform
                 </h3>
               </div>
-              <span className="inline-flex items-center rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
+              <span className="inline-flex shrink-0 items-center whitespace-nowrap rounded-full bg-emerald-50 px-2.5 py-0.5 text-xs font-semibold text-emerald-700">
                 {total}% match
               </span>
             </div>

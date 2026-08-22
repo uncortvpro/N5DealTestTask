@@ -17,6 +17,17 @@ html {
   }
 }
 
+/* iOS Safari auto-zooms the page on focus if a text input's font-size is
+   below 16px — our fields use text-sm (14px). Bumping just the rendered
+   font-size on mobile avoids the zoom without touching every component. */
+@media (max-width: 767px) {
+  input,
+  select,
+  textarea {
+    font-size: 16px;
+  }
+}
+
 /*
  * Plain CSS animations for the Dialog component — triggered automatically
  * by DOM insertion, not by a React/rAF state machine. That's deliberate:

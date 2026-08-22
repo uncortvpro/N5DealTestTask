@@ -76,6 +76,8 @@ pnpm workspaces tie the three packages together. Docker Compose orchestrates `my
 
 It's used in both directions: buyers see assets ranked and badged by fit against their own profile (`GET /api/match/assets`); sellers see buyers ranked by fit against their own active listings (`GET /api/buyers`). I chose a deterministic algorithm over an LLM call so the demo is instant, free, and doesn't depend on an external API key — see "what I'd improve" for the LLM-based extension I'd add next.
 
+**Progressive Web App.** The web app is installable: `apps/web/src/app/manifest.ts` (Next.js's manifest file convention) declares name/icons/`display: standalone`, favicon and app icons are generated on the fly via `next/og` (no binary image assets to keep in sync), and a hand-rolled service worker (`apps/web/public/sw.js`) caches static assets and serves an offline fallback page — network-first for pages, and `/api/*` is deliberately never cached so a signed-in user never sees stale or another session's data offline. Registered client-side only in production (`PwaRegister.tsx`), so it doesn't interfere with dev-mode hot reload.
+
 ## Assumptions
 
 - Only Buyer/Seller can self-register; Manager accounts are seeded, not self-served (a real deployment would provision these out-of-band).
@@ -93,7 +95,7 @@ Built end-to-end with **Claude Code** (Sonnet 5): architecture and data-model de
 - **LLM-powered natural-language search** ("SaaS companies in Europe under $10M") that parses free text into the existing filter set, layered on top of the deterministic match score.
 - **Blind/anonymized listings** — reveal seller identity only after both sides opt in, closer to real M&A marketplace conventions.
 - **Asset editing UI** for sellers (the API already supports `PATCH /api/assets/:id`; only the publish form is wired up in the UI).
-- **Real-time messaging** (WebSocket/SSE) instead of refresh-on-navigate.
+- **Real-time messaging** (WebSocket/SSE) — the inbox currently polls every 5s (`ContactsShell.tsx`, paused when the tab is hidden) rather than pushing updates, which was the pragmatic choice for the assignment's time box.
 - **i18n** (EN/RU), pagination for large result sets, an audit log for manager actions, and a leaner production Docker image (the current runtime stage keeps devDependencies for simplicity — see comment in `docker/Dockerfile.api`).
 - **Automated end-to-end tests** (Playwright) covering full user journeys in the browser, on top of the current API-level unit/integration suite.
 
