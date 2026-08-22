@@ -1,11 +1,11 @@
 "use client";
 
 import { SlidersHorizontal } from "lucide-react";
-import { SECTOR_LABELS, SECTORS, REGION_LABELS, REGIONS } from "@n5deal/shared";
 import { Button } from "@/components/ui/Button";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { KeywordFilterField } from "@/components/KeywordFilterField";
 import { useFilterParams } from "@/hooks/useFilterParams";
+import { useTaxonomy } from "@/hooks/useTaxonomy";
 
 const STATUS_OPTIONS = [
   { value: "", label: "All statuses" },
@@ -14,18 +14,11 @@ const STATUS_OPTIONS = [
   { value: "REMOVED", label: "Removed" },
 ];
 
-const SECTOR_OPTIONS = [
-  { value: "", label: "All sectors" },
-  ...SECTORS.map((s) => ({ value: s, label: SECTOR_LABELS[s] })),
-];
-
-const REGION_OPTIONS = [
-  { value: "", label: "All regions" },
-  ...REGIONS.map((r) => ({ value: r, label: REGION_LABELS[r] })),
-];
-
 export function ManagerAssetFilterBar() {
   const { searchParams, isPending, updateParam, clear } = useFilterParams();
+  const { sectors, regions } = useTaxonomy();
+  const sectorOptions = [{ value: "", label: "All sectors" }, ...sectors.map((s) => ({ value: s.key, label: s.label }))];
+  const regionOptions = [{ value: "", label: "All regions" }, ...regions.map((r) => ({ value: r.key, label: r.label }))];
 
   return (
     <div className="rounded-xl border border-navy-100 bg-white p-4 shadow-sm">
@@ -54,7 +47,7 @@ export function ManagerAssetFilterBar() {
           <label className="mb-1 block text-xs font-medium text-navy-500">Sector</label>
           <Dropdown
             className="w-44"
-            options={SECTOR_OPTIONS}
+            options={sectorOptions}
             value={searchParams.get("sector") ?? ""}
             onChange={(v) => updateParam("sector", v)}
           />
@@ -63,7 +56,7 @@ export function ManagerAssetFilterBar() {
           <label className="mb-1 block text-xs font-medium text-navy-500">Region</label>
           <Dropdown
             className="w-40"
-            options={REGION_OPTIONS}
+            options={regionOptions}
             value={searchParams.get("region") ?? ""}
             onChange={(v) => updateParam("region", v)}
           />

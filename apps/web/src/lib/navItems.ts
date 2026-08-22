@@ -5,6 +5,7 @@ import {
   Package,
   Search,
   Star,
+  Tags,
   Users,
   type LucideIcon,
 } from "lucide-react";
@@ -31,6 +32,7 @@ export function getNavItems(role: Role): (NavItem & { icon: LucideIcon })[] {
         { href: "/manager/buyers", label: "Buyers", icon: Users },
         { href: "/manager/sellers", label: "Sellers", icon: Briefcase },
         { href: "/manager/assets", label: "Assets", icon: Package },
+        { href: "/manager/taxonomy", label: "Sectors & Regions", icon: Tags },
       ];
   }
 }

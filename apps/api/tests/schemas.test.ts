@@ -108,8 +108,12 @@ describe("assetInputSchema", () => {
     expect(result.success).toBe(false);
   });
 
-  it("rejects an unknown sector value", () => {
-    const result = assetInputSchema.safeParse({ ...base, sector: "AEROSPACE" });
+  it("rejects an empty sector key", () => {
+    // Sector/region are manager-editable rows, not a fixed enum, so the
+    // schema only checks shape — whether the key actually exists (and is
+    // still active) is a DB lookup the route handler does, not something
+    // this schema can validate.
+    const result = assetInputSchema.safeParse({ ...base, sector: "" });
     expect(result.success).toBe(false);
   });
 

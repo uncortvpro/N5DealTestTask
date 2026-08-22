@@ -1,5 +1,12 @@
 import { z } from "zod";
-import { REGIONS, ROLES, SECTORS } from "./enums";
+import { ROLES } from "./enums";
+
+// Sector/region keys are validated for shape here; whether a given key
+// actually exists (and is still active) is a DB lookup done in the route
+// handler, since the valid set is manager-editable and not fixed at
+// compile time.
+const sectorKey = z.string().min(1).max(60);
+const regionKey = z.string().min(1).max(60);
 
 export const registerSchema = z
   .object({
@@ -24,8 +31,8 @@ export type LoginInput = z.infer<typeof loginSchema>;
 export const buyerProfileSchema = z
   .object({
     investmentThesis: z.string().min(10).max(2000),
-    sectors: z.array(z.enum(SECTORS)).min(1),
-    regions: z.array(z.enum(REGIONS)).min(1),
+    sectors: z.array(sectorKey).min(1),
+    regions: z.array(regionKey).min(1),
     ticketSizeMin: z.number().nonnegative(),
     ticketSizeMax: z.number().positive(),
   })
@@ -40,8 +47,8 @@ export const assetInputSchema = z
   .object({
     title: z.string().min(3).max(160),
     description: z.string().min(10).max(4000),
-    sector: z.enum(SECTORS),
-    region: z.enum(REGIONS),
+    sector: sectorKey,
+    region: regionKey,
     dealSize: z.number().positive(),
     revenue: z.number().nonnegative().optional(),
     ebitda: z.number().optional(),
@@ -50,8 +57,8 @@ export const assetInputSchema = z
 export type AssetInput = z.infer<typeof assetInputSchema>;
 
 export const assetFilterSchema = z.object({
-  sector: z.enum(SECTORS).optional(),
-  region: z.enum(REGIONS).optional(),
+  sector: sectorKey.optional(),
+  region: regionKey.optional(),
   minSize: z.coerce.number().nonnegative().optional(),
   maxSize: z.coerce.number().nonnegative().optional(),
   keyword: z.string().max(200).optional(),
@@ -59,8 +66,8 @@ export const assetFilterSchema = z.object({
 export type AssetFilterInput = z.infer<typeof assetFilterSchema>;
 
 export const buyerFilterSchema = z.object({
-  sector: z.enum(SECTORS).optional(),
-  region: z.enum(REGIONS).optional(),
+  sector: sectorKey.optional(),
+  region: regionKey.optional(),
   keyword: z.string().max(200).optional(),
 });
 export type BuyerFilterInput = z.infer<typeof buyerFilterSchema>;
@@ -74,8 +81,8 @@ export type ManagerUserFilterInput = z.infer<typeof managerUserFilterSchema>;
 
 export const managerAssetFilterSchema = z.object({
   status: z.enum(["ACTIVE", "SUSPENDED", "REMOVED"]).optional(),
-  sector: z.enum(SECTORS).optional(),
-  region: z.enum(REGIONS).optional(),
+  sector: sectorKey.optional(),
+  region: regionKey.optional(),
   keyword: z.string().max(200).optional(),
 });
 export type ManagerAssetFilterInput = z.infer<typeof managerAssetFilterSchema>;
@@ -103,5 +110,20 @@ export const sendMessageSchema = z
   })
   .strict();
 export type SendMessageInput = z.infer<typeof sendMessageSchema>;
+
+export const taxonomyCreateSchema = z
+  .object({
+    label: z.string().min(2).max(60),
+  })
+  .strict();
+export type TaxonomyCreateInput = z.infer<typeof taxonomyCreateSchema>;
+
+export const taxonomyUpdateSchema = z
+  .object({
+    label: z.string().min(2).max(60).optional(),
+    active: z.boolean().optional(),
+  })
+  .strict();
+export type TaxonomyUpdateInput = z.infer<typeof taxonomyUpdateSchema>;
 
 export const rolesEnum = ROLES;

@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft } from "lucide-react";
 import type { BuyerProfile, PublicUser } from "@n5deal/shared";
-import { SECTOR_LABELS, REGION_LABELS, idFromSlugPath } from "@n5deal/shared";
+import { idFromSlugPath } from "@n5deal/shared";
 import { apiFetch } from "@/lib/serverFetch";
 import { getSession } from "@/lib/session";
 import { Card, CardBody } from "@/components/ui/Card";
@@ -66,14 +66,14 @@ export default async function BuyerDetailPage({ params }: { params: { slug: stri
                 {buyer.profile.investmentThesis}
               </p>
               <div className="flex flex-wrap gap-2">
-                {buyer.profile.sectors.map((s) => (
-                  <Badge key={s} tone="info">
-                    {SECTOR_LABELS[s]}
+                {buyer.profile.sectorLabels.map((label) => (
+                  <Badge key={label} tone="info">
+                    {label}
                   </Badge>
                 ))}
-                {buyer.profile.regions.map((r) => (
-                  <Badge key={r} tone="neutral">
-                    {REGION_LABELS[r]}
+                {buyer.profile.regionLabels.map((label) => (
+                  <Badge key={label} tone="neutral">
+                    {label}
                   </Badge>
                 ))}
               </div>

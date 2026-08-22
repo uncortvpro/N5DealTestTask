@@ -24,24 +24,32 @@ enum AssetStatus {
   REMOVED
 }
 
-enum Sector {
-  TECHNOLOGY
-  HEALTHCARE
-  MANUFACTURING
-  FINANCIAL_SERVICES
-  REAL_ESTATE
-  ENERGY
-  RETAIL
-  OTHER
+// Sector/Region used to be fixed enums. They're now manager-editable rows —
+// `key` is the stable, immutable identifier every reference (Asset,
+// BuyerSector/BuyerRegion) stores and joins against; `label` is the only
+// thing a manager edits, and `active` is a soft toggle so retiring a value
+// hides it from new selections without orphaning assets/profiles that
+// already reference it.
+model Sector {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  label     String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  assets       Asset[]
+  buyerSectors BuyerSector[]
 }
 
-enum Region {
-  NORTH_AMERICA
-  EUROPE
-  APAC
-  LATAM
-  MEA
-  GLOBAL
+model Region {
+  id        Int      @id @default(autoincrement())
+  key       String   @unique
+  label     String
+  active    Boolean  @default(true)
+  createdAt DateTime @default(now())
+
+  assets       Asset[]
+  buyerRegions BuyerRegion[]
 }
 
 model User {
@@ -84,9 +92,10 @@ model BuyerProfile {
 model BuyerSector {
   id             Int    @id @default(autoincrement())
   buyerProfileId Int
-  sector         Sector
+  sector         String
 
   buyerProfile BuyerProfile @relation(fields: [buyerProfileId], references: [userId], onDelete: Cascade)
+  sectorRef    Sector       @relation(fields: [sector], references: [key])
 
   @@unique([buyerProfileId, sector])
 }
@@ -94,9 +103,10 @@ model BuyerSector {
 model BuyerRegion {
   id             Int    @id @default(autoincrement())
   buyerProfileId Int
-  region         Region
+  region         String
 
   buyerProfile BuyerProfile @relation(fields: [buyerProfileId], references: [userId], onDelete: Cascade)
+  regionRef    Region       @relation(fields: [region], references: [key])
 
   @@unique([buyerProfileId, region])
 }
@@ -106,8 +116,8 @@ model Asset {
   sellerId     Int
   title        String
   description  String      @db.Text
-  sector       Sector
-  region       Region
+  sector       String
+  region       String
   dealSize     Int
   revenue      Int?
   ebitda       Int?
@@ -118,6 +128,8 @@ model Asset {
   updatedAt    DateTime    @updatedAt
 
   seller        User           @relation("SellerAssets", fields: [sellerId], references: [id], onDelete: Cascade)
+  sectorRef     Sector         @relation(fields: [sector], references: [key])
+  regionRef     Region         @relation(fields: [region], references: [key])
   conversations Conversation[]
   favorites     Favorite[]
 

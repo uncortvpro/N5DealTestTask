@@ -1,12 +1,17 @@
 import { Router } from "express";
 import { assetFilterSchema, assetInputSchema, getMatchBreakdown } from "@n5deal/shared";
-import type { Region, Sector } from "@n5deal/shared";
 import { prisma } from "../db";
 import { asyncHandler } from "../lib/asyncHandler";
 import { parseBody } from "../lib/validate";
 import { loadCurrentUser, requireAuth, requireRole } from "../middleware/auth";
 import { toAsset, toBuyerProfile } from "../serializers";
 import type { Prisma } from "@prisma/client";
+
+const assetWithLabels = { sectorRef: true, regionRef: true } as const;
+const buyerProfileWithLabels = {
+  sectors: { include: { sectorRef: true } },
+  regions: { include: { regionRef: true } },
+} as const;
 
 export const assetsRouter = Router();
 
@@ -51,7 +56,11 @@ assetsRouter.get(
       where.id = { not: Number(req.query.excludeId) };
     }
 
-    const assets = await prisma.asset.findMany({ where, orderBy: { createdAt: "desc" } });
+    const assets = await prisma.asset.findMany({
+      where,
+      include: assetWithLabels,
+      orderBy: { createdAt: "desc" },
+    });
     res.json({ assets: assets.map(toAsset) });
   })
 );
@@ -63,6 +72,13 @@ assetsRouter.post(
     const data = parseBody(assetInputSchema, req.body, res);
     if (!data) return;
 
+    const [sector, region] = await Promise.all([
+      prisma.sector.findFirst({ where: { key: data.sector, active: true } }),
+      prisma.region.findFirst({ where: { key: data.region, active: true } }),
+    ]);
+    if (!sector) return res.status(400).json({ error: "Sector is invalid or no longer active" });
+    if (!region) return res.status(400).json({ error: "Region is invalid or no longer active" });
+
     const asset = await prisma.asset.create({
       data: {
         ...data,
@@ -70,6 +86,7 @@ assetsRouter.post(
         ebitda: data.ebitda ?? null,
         sellerId: req.currentUser!.id,
       },
+      include: assetWithLabels,
     });
     res.status(201).json({ asset: toAsset(asset) });
   })
@@ -79,7 +96,10 @@ assetsRouter.get(
   "/:id",
   asyncHandler(async (req, res) => {
     const id = Number(req.params.id);
-    const asset = await prisma.asset.findUnique({ where: { id }, include: { seller: true } });
+    const asset = await prisma.asset.findUnique({
+      where: { id },
+      include: { seller: true, ...assetWithLabels },
+    });
     if (!asset) return res.status(404).json({ error: "Asset not found" });
 
     const isOwner = asset.sellerId === req.currentUser!.id;
@@ -95,7 +115,7 @@ assetsRouter.get(
       const [buyerProfile, favorite] = await Promise.all([
         prisma.buyerProfile.findUnique({
           where: { userId: req.currentUser!.id },
-          include: { sectors: true, regions: true },
+          include: buyerProfileWithLabels,
         }),
         prisma.favorite.findUnique({
           where: { buyerId_assetId: { buyerId: req.currentUser!.id, assetId: id } },
@@ -104,8 +124,8 @@ assetsRouter.get(
 
       if (buyerProfile) {
         matchBreakdown = getMatchBreakdown(toBuyerProfile(buyerProfile), {
-          sector: asset.sector as Sector,
-          region: asset.region as Region,
+          sector: asset.sector,
+          region: asset.region,
           dealSize: asset.dealSize,
         });
       }
@@ -142,9 +162,19 @@ assetsRouter.patch(
     const data = parseBody(assetInputSchema.partial(), req.body, res);
     if (!data) return;
 
+    if (data.sector) {
+      const sector = await prisma.sector.findFirst({ where: { key: data.sector, active: true } });
+      if (!sector) return res.status(400).json({ error: "Sector is invalid or no longer active" });
+    }
+    if (data.region) {
+      const region = await prisma.region.findFirst({ where: { key: data.region, active: true } });
+      if (!region) return res.status(400).json({ error: "Region is invalid or no longer active" });
+    }
+
     const asset = await prisma.asset.update({
       where: { id },
       data: { ...data, revenue: data.revenue ?? undefined, ebitda: data.ebitda ?? undefined },
+      include: assetWithLabels,
     });
     res.json({ asset: toAsset(asset) });
   })

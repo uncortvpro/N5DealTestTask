@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Pencil, Sparkles } from "lucide-react";
-import { SECTOR_LABELS, REGION_LABELS, type BuyerProfile } from "@n5deal/shared";
+import type { BuyerProfile } from "@n5deal/shared";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -44,9 +44,9 @@ export function ProfileCriteriaCard({ profile }: { profile: BuyerProfile | null 
               <div>
                 <p className="mb-2 text-xs font-medium uppercase tracking-wide text-navy-400">Sectors</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {profile.sectors.map((s) => (
-                    <Badge key={s} tone="info">
-                      {SECTOR_LABELS[s]}
+                  {profile.sectorLabels.map((label) => (
+                    <Badge key={label} tone="info">
+                      {label}
                     </Badge>
                   ))}
                 </div>
@@ -54,9 +54,9 @@ export function ProfileCriteriaCard({ profile }: { profile: BuyerProfile | null 
               <div>
                 <p className="mb-2 text-xs font-medium uppercase tracking-wide text-navy-400">Regions</p>
                 <div className="flex flex-wrap gap-1.5">
-                  {profile.regions.map((r) => (
-                    <Badge key={r} tone="neutral">
-                      {REGION_LABELS[r]}
+                  {profile.regionLabels.map((label) => (
+                    <Badge key={label} tone="neutral">
+                      {label}
                     </Badge>
                   ))}
                 </div>

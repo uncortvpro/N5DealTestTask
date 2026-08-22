@@ -1,6 +1,5 @@
 import Link from "next/link";
 import { AlertTriangle, Briefcase, Building2, Package, Users } from "lucide-react";
-import { SECTOR_LABELS, type Sector } from "@n5deal/shared";
 import { apiFetch } from "@/lib/serverFetch";
 import { getSession } from "@/lib/session";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
@@ -14,7 +13,7 @@ interface Stats {
   suspendedUsers: number;
   suspendedAssets: number;
   totalPortfolioValue: number;
-  sectorBreakdown: { sector: Sector; count: number }[];
+  sectorBreakdown: { sector: string; label: string; count: number }[];
 }
 
 export default async function ManagerOverviewPage() {
@@ -107,7 +106,7 @@ export default async function ManagerOverviewPage() {
             <CardBody className="space-y-3">
               {data.sectorBreakdown.map((s) => (
                 <div key={s.sector} className="flex items-center gap-4">
-                  <span className="w-40 shrink-0 text-sm text-navy-700">{SECTOR_LABELS[s.sector]}</span>
+                  <span className="w-40 shrink-0 text-sm text-navy-700">{s.label}</span>
                   <div className="h-2 flex-1 overflow-hidden rounded-full bg-navy-50">
                     <div
                       className="h-full rounded-full bg-gold-400 transition-[width] duration-700 ease-out"

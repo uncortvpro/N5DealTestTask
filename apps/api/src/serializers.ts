@@ -1,5 +1,5 @@
 import type { Asset as PrismaAsset, User } from "@prisma/client";
-import type { Asset, BuyerProfile, PublicUser, Region, Sector } from "@n5deal/shared";
+import type { Asset, BuyerProfile, PublicUser } from "@n5deal/shared";
 
 export function toPublicUser(user: User): PublicUser {
   return {
@@ -15,14 +15,18 @@ export function toPublicUser(user: User): PublicUser {
   };
 }
 
-export function toAsset(asset: PrismaAsset): Asset {
+export function toAsset(
+  asset: PrismaAsset & { sectorRef: { label: string }; regionRef: { label: string } }
+): Asset {
   return {
     id: asset.id,
     sellerId: asset.sellerId,
     title: asset.title,
     description: asset.description,
-    sector: asset.sector as Sector,
-    region: asset.region as Region,
+    sector: asset.sector,
+    sectorLabel: asset.sectorRef.label,
+    region: asset.region,
+    regionLabel: asset.regionRef.label,
     dealSize: asset.dealSize,
     revenue: asset.revenue,
     ebitda: asset.ebitda,
@@ -37,15 +41,17 @@ export function toBuyerProfile(profile: {
   investmentThesis: string;
   ticketSizeMin: number;
   ticketSizeMax: number;
-  sectors: { sector: string }[];
-  regions: { region: string }[];
+  sectors: { sector: string; sectorRef: { label: string } }[];
+  regions: { region: string; regionRef: { label: string } }[];
 }): BuyerProfile {
   return {
     userId: profile.userId,
     investmentThesis: profile.investmentThesis,
     ticketSizeMin: profile.ticketSizeMin,
     ticketSizeMax: profile.ticketSizeMax,
-    sectors: profile.sectors.map((s) => s.sector as Sector),
-    regions: profile.regions.map((r) => r.region as Region),
+    sectors: profile.sectors.map((s) => s.sector),
+    sectorLabels: profile.sectors.map((s) => s.sectorRef.label),
+    regions: profile.regions.map((r) => r.region),
+    regionLabels: profile.regions.map((r) => r.regionRef.label),
   };
 }

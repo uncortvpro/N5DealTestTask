@@ -2,7 +2,7 @@ import Link from "next/link";
 import { notFound, redirect } from "next/navigation";
 import { ArrowLeft, Calendar } from "lucide-react";
 import type { Asset, AssetWithScore, MatchBreakdown } from "@n5deal/shared";
-import { SECTOR_LABELS, REGION_LABELS, idFromSlugPath } from "@n5deal/shared";
+import { idFromSlugPath } from "@n5deal/shared";
 import { apiFetch } from "@/lib/serverFetch";
 import { getSession } from "@/lib/session";
 import { Card, CardBody } from "@/components/ui/Card";
@@ -121,8 +121,8 @@ export default async function AssetDetailPage({ params }: { params: { slug: stri
 
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div className="flex flex-wrap gap-2">
-                  <Badge tone="info">{SECTOR_LABELS[asset.sector]}</Badge>
-                  <Badge tone="neutral">{REGION_LABELS[asset.region]}</Badge>
+                  <Badge tone="info">{asset.sectorLabel}</Badge>
+                  <Badge tone="neutral">{asset.regionLabel}</Badge>
                 </div>
                 {user.role === "BUYER" && (
                   <FavoriteButton assetId={asset.id} initialFavorited={asset.isFavorited} size="sm" />

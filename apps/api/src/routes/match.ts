@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { assetFilterSchema, scoreAssetForBuyer } from "@n5deal/shared";
-import type { Region, Sector } from "@n5deal/shared";
 import { prisma } from "../db";
 import { asyncHandler } from "../lib/asyncHandler";
 import { loadCurrentUser, requireAuth, requireRole } from "../middleware/auth";
@@ -18,10 +17,10 @@ matchRouter.get(
 
     const profileRecord = await prisma.buyerProfile.findUnique({
       where: { userId: req.currentUser!.id },
-      include: { sectors: true, regions: true },
+      include: { sectors: { include: { sectorRef: true } }, regions: { include: { regionRef: true } } },
     });
 
-    const where: Prisma.AssetWhereInput = { status: "ACTIVE" };
+    const where: Prisma.AssetWhereInput = { status: "ACTIVE", seller: { status: "ACTIVE" } };
     if (filters.sector) where.sector = filters.sector;
     if (filters.region) where.region = filters.region;
     if (filters.minSize !== undefined || filters.maxSize !== undefined) {
@@ -37,15 +36,19 @@ matchRouter.get(
       ];
     }
 
-    const assets = await prisma.asset.findMany({ where, orderBy: { createdAt: "desc" } });
+    const assets = await prisma.asset.findMany({
+      where,
+      include: { sectorRef: true, regionRef: true },
+      orderBy: { createdAt: "desc" },
+    });
     const profile = profileRecord ? toBuyerProfile(profileRecord) : null;
 
     const scored = assets.map((asset) => ({
       ...toAsset(asset),
       matchScore: profile
         ? scoreAssetForBuyer(profile, {
-            sector: asset.sector as Sector,
-            region: asset.region as Region,
+            sector: asset.sector,
+            region: asset.region,
             dealSize: asset.dealSize,
           })
         : null,

@@ -16,7 +16,9 @@ export interface BuyerProfile {
   userId: number;
   investmentThesis: string;
   sectors: Sector[];
+  sectorLabels: string[];
   regions: Region[];
+  regionLabels: string[];
   ticketSizeMin: number;
   ticketSizeMax: number;
 }
@@ -27,7 +29,9 @@ export interface Asset {
   title: string;
   description: string;
   sector: Sector;
+  sectorLabel: string;
   region: Region;
+  regionLabel: string;
   dealSize: number;
   revenue: number | null;
   ebitda: number | null;

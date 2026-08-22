@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SECTOR_LABELS, REGION_LABELS, toSlugPath, type AssetWithScore } from "@n5deal/shared";
+import { toSlugPath, type AssetWithScore } from "@n5deal/shared";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { MatchRing } from "@/components/MatchRing";
@@ -43,8 +43,8 @@ export function AssetCard({
           </div>
 
           <div className="flex flex-1 flex-wrap items-end gap-2 text-xs">
-            <Badge tone="info">{SECTOR_LABELS[asset.sector]}</Badge>
-            <Badge tone="neutral">{REGION_LABELS[asset.region]}</Badge>
+            <Badge tone="info">{asset.sectorLabel}</Badge>
+            <Badge tone="neutral">{asset.regionLabel}</Badge>
           </div>
 
           <div className="flex items-baseline justify-between border-t border-navy-100 pt-3">

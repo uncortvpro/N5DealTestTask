@@ -1,6 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
-import { SECTOR_LABELS, REGION_LABELS, toSlugPath, type AssetWithScore } from "@n5deal/shared";
+import { toSlugPath, type AssetWithScore } from "@n5deal/shared";
 import { Card } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { MatchRing } from "@/components/MatchRing";
@@ -23,8 +23,8 @@ export function FeaturedListingCard({ asset }: { asset: AssetWithScore }) {
               {asset.description}
             </p>
             <div className="mt-3 flex flex-wrap gap-2 text-xs">
-              <Badge tone="info">{SECTOR_LABELS[asset.sector]}</Badge>
-              <Badge tone="neutral">{REGION_LABELS[asset.region]}</Badge>
+              <Badge tone="info">{asset.sectorLabel}</Badge>
+              <Badge tone="neutral">{asset.regionLabel}</Badge>
             </div>
           </div>
 

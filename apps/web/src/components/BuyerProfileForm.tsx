@@ -5,19 +5,12 @@ import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { Check, CheckCircle2 } from "lucide-react";
-import {
-  buyerProfileSchema,
-  REGIONS,
-  REGION_LABELS,
-  SECTORS,
-  SECTOR_LABELS,
-  type BuyerProfile,
-  type BuyerProfileInput,
-} from "@n5deal/shared";
+import { buyerProfileSchema, type BuyerProfile, type BuyerProfileInput } from "@n5deal/shared";
 import { ApiError, apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/ui/Button";
 import { FieldError, Input, Label, Textarea } from "@/components/ui/Field";
 import { cn } from "@/lib/cn";
+import { useTaxonomy } from "@/hooks/useTaxonomy";
 
 export function BuyerProfileForm({
   initialProfile,
@@ -29,6 +22,7 @@ export function BuyerProfileForm({
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
   const [saved, setSaved] = useState(false);
+  const { sectors, regions } = useTaxonomy();
 
   const {
     register,
@@ -100,7 +94,7 @@ export function BuyerProfileForm({
           control={control}
           render={({ field }) => (
             <CheckboxGrid
-              options={SECTORS.map((s) => ({ value: s, label: SECTOR_LABELS[s] }))}
+              options={sectors.map((s) => ({ value: s.key, label: s.label }))}
               value={field.value}
               onChange={field.onChange}
             />
@@ -116,7 +110,7 @@ export function BuyerProfileForm({
           control={control}
           render={({ field }) => (
             <CheckboxGrid
-              options={REGIONS.map((r) => ({ value: r, label: REGION_LABELS[r] }))}
+              options={regions.map((r) => ({ value: r.key, label: r.label }))}
               value={field.value}
               onChange={field.onChange}
             />

@@ -12,7 +12,10 @@ import {
 import type { Sector } from "@n5deal/shared";
 import { cn } from "@/lib/cn";
 
-const SECTOR_ICON: Record<Sector, LucideIcon> = {
+// Sector keys are manager-editable now, so this can't cover every possible
+// value — known keys get a fitting icon, anything else (including a
+// manager-added sector) falls back to a generic one.
+const SECTOR_ICON: Partial<Record<Sector, LucideIcon>> = {
   TECHNOLOGY: Cpu,
   HEALTHCARE: HeartPulse,
   MANUFACTURING: Factory,
@@ -24,7 +27,7 @@ const SECTOR_ICON: Record<Sector, LucideIcon> = {
 };
 
 export function SectorIcon({ sector, className }: { sector: Sector; className?: string }) {
-  const Icon = SECTOR_ICON[sector];
+  const Icon = SECTOR_ICON[sector] ?? Layers;
   return (
     <div
       className={cn(

@@ -37,7 +37,7 @@ buyersRouter.get(
             }
           : {}),
       },
-      include: { buyerProfile: { include: { sectors: true, regions: true } } },
+      include: { buyerProfile: { include: { sectors: { include: { sectorRef: true } }, regions: { include: { regionRef: true } } } } },
       orderBy: { createdAt: "desc" },
     });
 
@@ -83,7 +83,7 @@ buyersRouter.get(
     const isManager = req.currentUser!.role === "MANAGER";
     const buyer = await prisma.user.findFirst({
       where: { id, role: "BUYER", ...(isManager ? {} : { status: "ACTIVE" }) },
-      include: { buyerProfile: { include: { sectors: true, regions: true } } },
+      include: { buyerProfile: { include: { sectors: { include: { sectorRef: true } }, regions: { include: { regionRef: true } } } } },
     });
     if (!buyer) return res.status(404).json({ error: "Buyer not found" });
 

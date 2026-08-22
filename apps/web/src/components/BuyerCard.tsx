@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SECTOR_LABELS, REGION_LABELS, toSlugPath, type BuyerWithScore } from "@n5deal/shared";
+import { toSlugPath, type BuyerWithScore } from "@n5deal/shared";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { MatchRing } from "@/components/MatchRing";
@@ -30,14 +30,14 @@ export function BuyerCard({ buyer }: { buyer: BuyerWithScore }) {
                 {buyer.profile.investmentThesis}
               </p>
               <div className="flex flex-wrap gap-1.5 text-xs">
-                {buyer.profile.sectors.slice(0, 3).map((s) => (
-                  <Badge key={s} tone="info">
-                    {SECTOR_LABELS[s]}
+                {buyer.profile.sectorLabels.slice(0, 3).map((label) => (
+                  <Badge key={label} tone="info">
+                    {label}
                   </Badge>
                 ))}
-                {buyer.profile.regions.slice(0, 2).map((r) => (
-                  <Badge key={r} tone="neutral">
-                    {REGION_LABELS[r]}
+                {buyer.profile.regionLabels.slice(0, 2).map((label) => (
+                  <Badge key={label} tone="neutral">
+                    {label}
                   </Badge>
                 ))}
               </div>

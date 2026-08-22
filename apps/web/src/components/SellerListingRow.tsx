@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { SECTOR_LABELS, REGION_LABELS, toSlugPath, type Asset } from "@n5deal/shared";
+import { toSlugPath, type Asset } from "@n5deal/shared";
 import { Card, CardBody } from "@/components/ui/Card";
 import { Badge } from "@/components/ui/Badge";
 import { StatusBadge } from "@/components/StatusBadge";
@@ -21,8 +21,8 @@ export function SellerListingRow({ asset }: { asset: Asset }) {
               <StatusBadge status={asset.status} />
             </div>
             <div className="mt-1 flex flex-wrap items-center gap-2 text-xs">
-              <Badge tone="info">{SECTOR_LABELS[asset.sector]}</Badge>
-              <Badge tone="neutral">{REGION_LABELS[asset.region]}</Badge>
+              <Badge tone="info">{asset.sectorLabel}</Badge>
+              <Badge tone="neutral">{asset.regionLabel}</Badge>
               <span className="text-navy-400">Listed {formatDate(asset.createdAt)}</span>
             </div>
             {asset.status !== "ACTIVE" && asset.statusReason && (

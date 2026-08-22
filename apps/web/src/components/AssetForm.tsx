@@ -4,22 +4,12 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import {
-  assetInputSchema,
-  REGIONS,
-  REGION_LABELS,
-  SECTORS,
-  SECTOR_LABELS,
-  toSlugPath,
-  type AssetInput,
-} from "@n5deal/shared";
+import { assetInputSchema, toSlugPath, type AssetInput } from "@n5deal/shared";
 import { ApiError, apiClient } from "@/lib/apiClient";
 import { Button } from "@/components/ui/Button";
 import { Dropdown } from "@/components/ui/Dropdown";
 import { FieldError, Input, Label, Textarea } from "@/components/ui/Field";
-
-const SECTOR_OPTIONS = SECTORS.map((s) => ({ value: s, label: SECTOR_LABELS[s] }));
-const REGION_OPTIONS = REGIONS.map((r) => ({ value: r, label: REGION_LABELS[r] }));
+import { useTaxonomy } from "@/hooks/useTaxonomy";
 
 export function AssetForm({
   mode = "create",
@@ -34,6 +24,9 @@ export function AssetForm({
 }) {
   const router = useRouter();
   const [serverError, setServerError] = useState<string | null>(null);
+  const { sectors, regions } = useTaxonomy();
+  const sectorOptions = sectors.map((s) => ({ value: s.key, label: s.label }));
+  const regionOptions = regions.map((r) => ({ value: r.key, label: r.label }));
   const {
     register,
     handleSubmit,
@@ -89,7 +82,7 @@ export function AssetForm({
             control={control}
             render={({ field }) => (
               <Dropdown
-                options={SECTOR_OPTIONS}
+                options={sectorOptions}
                 value={field.value ?? ""}
                 onChange={field.onChange}
                 placeholder="Select a sector"
@@ -105,7 +98,7 @@ export function AssetForm({
             control={control}
             render={({ field }) => (
               <Dropdown
-                options={REGION_OPTIONS}
+                options={regionOptions}
                 value={field.value ?? ""}
                 onChange={field.onChange}
                 placeholder="Select a region"

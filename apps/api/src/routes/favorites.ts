@@ -1,6 +1,5 @@
 import { Router } from "express";
 import { getMatchBreakdown } from "@n5deal/shared";
-import type { Region, Sector } from "@n5deal/shared";
 import { prisma } from "../db";
 import { asyncHandler } from "../lib/asyncHandler";
 import { loadCurrentUser, requireAuth, requireRole } from "../middleware/auth";
@@ -16,12 +15,12 @@ favoritesRouter.get(
     const [favorites, buyerProfile] = await Promise.all([
       prisma.favorite.findMany({
         where: { buyerId: req.currentUser!.id },
-        include: { asset: true },
+        include: { asset: { include: { sectorRef: true, regionRef: true } } },
         orderBy: { createdAt: "desc" },
       }),
       prisma.buyerProfile.findUnique({
         where: { userId: req.currentUser!.id },
-        include: { sectors: true, regions: true },
+        include: { sectors: { include: { sectorRef: true } }, regions: { include: { regionRef: true } } },
       }),
     ]);
 
@@ -33,8 +32,8 @@ favoritesRouter.get(
         ...toAsset(f.asset),
         matchScore: profile
           ? getMatchBreakdown(profile, {
-              sector: f.asset.sector as Sector,
-              region: f.asset.region as Region,
+              sector: f.asset.sector,
+              region: f.asset.region,
               dealSize: f.asset.dealSize,
             }).score
           : null,
