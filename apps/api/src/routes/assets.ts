@@ -5,6 +5,8 @@ import { asyncHandler } from "../lib/asyncHandler";
 import { parseBody } from "../lib/validate";
 import { loadCurrentUser, requireAuth, requireRole } from "../middleware/auth";
 import { toAsset, toBuyerProfile } from "../serializers";
+import { getAnthropicClient } from "../lib/anthropic";
+import { buildMatchExplanationPrompt } from "../lib/matchExplanationPrompt";
 import type { Prisma } from "@prisma/client";
 
 const assetWithLabels = { sectorRef: true, regionRef: true } as const;
@@ -142,6 +144,68 @@ assetsRouter.get(
         isFavorited,
       },
     });
+  })
+);
+
+/**
+ * LLM-generated "why this matches" note layered on top of the deterministic
+ * score — a real Claude call, not another weighted feature. Kept as its own
+ * lazily-fetched endpoint rather than bundled into GET /:id so the asset
+ * page itself never waits on an LLM round trip. Cached per (buyer, asset)
+ * pair in MatchExplanation; buyerProfile.ts clears the cache when a buyer
+ * edits their profile, since the note is only valid for the profile it was
+ * written against.
+ */
+assetsRouter.get(
+  "/:id/match-explanation",
+  requireRole("BUYER"),
+  asyncHandler(async (req, res) => {
+    const assetId = Number(req.params.id);
+    const buyerId = req.currentUser!.id;
+
+    const cached = await prisma.matchExplanation.findUnique({
+      where: { buyerId_assetId: { buyerId, assetId } },
+    });
+    if (cached) return res.json({ explanation: cached.text });
+
+    const client = getAnthropicClient();
+    if (!client) return res.status(503).json({ error: "Match explanations are not configured" });
+
+    const [asset, buyerProfile] = await Promise.all([
+      prisma.asset.findUnique({ where: { id: assetId }, include: assetWithLabels }),
+      prisma.buyerProfile.findUnique({
+        where: { userId: buyerId },
+        include: buyerProfileWithLabels,
+      }),
+    ]);
+    if (!asset || !buyerProfile) {
+      return res.status(404).json({ error: "Not enough data to explain this match" });
+    }
+
+    const prompt = buildMatchExplanationPrompt(toBuyerProfile(buyerProfile), asset);
+
+    let text: string;
+    try {
+      const response = await client.messages.create({
+        model: "claude-haiku-4-5-20251001",
+        max_tokens: 120,
+        messages: [{ role: "user", content: prompt }],
+      });
+      const block = response.content[0];
+      text = block?.type === "text" ? block.text.trim() : "";
+      if (!text) throw new Error("empty response from model");
+    } catch (err) {
+      console.error("match-explanation generation failed", err);
+      return res.status(502).json({ error: "Could not generate an explanation right now" });
+    }
+
+    await prisma.matchExplanation.upsert({
+      where: { buyerId_assetId: { buyerId, assetId } },
+      create: { buyerId, assetId, text },
+      update: { text },
+    });
+
+    res.json({ explanation: text });
   })
 );
 

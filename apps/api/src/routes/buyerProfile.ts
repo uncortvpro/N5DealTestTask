@@ -67,6 +67,11 @@ buyerProfileRouter.put(
       await tx.buyerRegion.createMany({
         data: data.regions.map((region) => ({ buyerProfileId: userId, region })),
       });
+
+      // The buyer's profile just changed, so any cached "why this matches"
+      // note was written against the old one — clear it rather than let a
+      // stale explanation reference criteria the buyer no longer has.
+      await tx.matchExplanation.deleteMany({ where: { buyerId: userId } });
     });
 
     const profile = await prisma.buyerProfile.findUniqueOrThrow({

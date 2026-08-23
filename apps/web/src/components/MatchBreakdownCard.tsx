@@ -1,8 +1,15 @@
 import type { MatchBreakdown } from "@n5deal/shared";
 import { Card, CardBody, CardHeader } from "@/components/ui/Card";
+import { MatchExplanation } from "@/components/MatchExplanation";
 import { cn } from "@/lib/cn";
 
-export function MatchBreakdownCard({ breakdown }: { breakdown: MatchBreakdown }) {
+export function MatchBreakdownCard({
+  breakdown,
+  assetId,
+}: {
+  breakdown: MatchBreakdown;
+  assetId: number;
+}) {
   return (
     <Card>
       <CardHeader>
@@ -14,6 +21,7 @@ export function MatchBreakdownCard({ breakdown }: { breakdown: MatchBreakdown })
         <BreakdownRow label="Region fit" ratio={breakdown.regionMatch ? 1 : 0} />
         <BreakdownRow label="Deal size fit" ratio={breakdown.sizeFitRatio} />
       </CardBody>
+      <MatchExplanation assetId={assetId} />
     </Card>
   );
 }

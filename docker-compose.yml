@@ -25,6 +25,7 @@ services:
     environment:
       DATABASE_URL: mysql://n5deal:n5deal@mysql:3306/n5deal
       JWT_SECRET: ${JWT_SECRET:-please-change-me-in-production}
+      ANTHROPIC_API_KEY: ${ANTHROPIC_API_KEY:-}
       PORT: 4000
       WEB_ORIGIN: http://localhost:3000
       NODE_ENV: production

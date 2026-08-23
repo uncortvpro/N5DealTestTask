@@ -72,6 +72,7 @@ model User {
   conversationsAsSeller Conversation[] @relation("SellerConversations")
   messages          Message[]
   favorites         Favorite[]
+  matchExplanations MatchExplanation[]
 
   @@index([role])
   @@index([status])
@@ -132,10 +133,28 @@ model Asset {
   regionRef     Region         @relation(fields: [region], references: [key])
   conversations Conversation[]
   favorites     Favorite[]
+  matchExplanations MatchExplanation[]
 
   @@index([sector])
   @@index([region])
   @@index([status])
+}
+
+// LLM-generated "why this matches" text, cached per (buyer, asset) pair so
+// the model is only called once per pair instead of on every page view.
+// Invalidated (deleted) whenever the buyer edits their profile, since the
+// explanation is only valid for the profile it was generated against.
+model MatchExplanation {
+  id        Int      @id @default(autoincrement())
+  buyerId   Int
+  assetId   Int
+  text      String   @db.Text
+  createdAt DateTime @default(now())
+
+  buyer User  @relation(fields: [buyerId], references: [id], onDelete: Cascade)
+  asset Asset @relation(fields: [assetId], references: [id], onDelete: Cascade)
+
+  @@unique([buyerId, assetId])
 }
 
 model Favorite {

@@ -7,7 +7,7 @@ A working prototype of an M&A / financial-asset marketplace with three roles —
 Requires Docker + Docker Compose.
 
 ```bash
-cp .env.example .env   # optional: set your own JWT_SECRET
+cp .env.example .env   # optional: set your own JWT_SECRET, add ANTHROPIC_API_KEY to enable LLM match explanations
 docker compose up --build
 ```
 
@@ -76,7 +76,9 @@ pnpm workspaces tie the three packages together. Docker Compose orchestrates `my
 - +25 if the asset's region matches (a buyer who selected "Global" matches any region)
 - +35 for deal-size fit within the buyer's ticket-size range, degrading linearly for the 25% just outside that range instead of a hard cutoff (real buyers stay flexible near the edges)
 
-It's used in both directions: buyers see assets ranked and badged by fit against their own profile (`GET /api/match/assets`); sellers see buyers ranked by fit against their own active listings (`GET /api/buyers`). I chose a deterministic algorithm over an LLM call so the demo is instant, free, and doesn't depend on an external API key — see "what I'd improve" for the LLM-based extension I'd add next.
+It's used in both directions: buyers see assets ranked and badged by fit against their own profile (`GET /api/match/assets`); sellers see buyers ranked by fit against their own active listings (`GET /api/buyers`). I chose a deterministic algorithm over an LLM call as the primary signal so ranking and filtering stay instant, free, and fully explainable — no listing's score depends on an external API being up.
+
+**LLM match explanations — real Claude call, layered on top.** The deterministic score above is the ranking signal; `GET /api/assets/:id/match-explanation` (`apps/api/src/lib/matchExplanationPrompt.ts`) adds a genuine LLM call (Claude Haiku) that turns the buyer's thesis and the listing's details into a one- or two-sentence analyst note — explicitly instructed to cite specifics and call out a *weak* fit plainly rather than produce generic "great fit" copy. Fetched lazily from the client (`MatchExplanation.tsx`) so the asset page itself never waits on the LLM, cached per (buyer, asset) pair in the `MatchExplanation` table so it's one call per pair rather than one per page view, and invalidated whenever the buyer edits their profile. Fails silently — no `ANTHROPIC_API_KEY` configured just means the note doesn't render, everything else on the page works unaffected.
 
 **Progressive Web App.** The web app is installable: `apps/web/src/app/manifest.ts` (Next.js's manifest file convention) declares name/icons/`display: standalone`, favicon and app icons are generated on the fly via `next/og` (no binary image assets to keep in sync), and a hand-rolled service worker (`apps/web/public/sw.js`) caches static assets and serves an offline fallback page — network-first for pages, and `/api/*` is deliberately never cached so a signed-in user never sees stale or another session's data offline. Registered client-side only in production (`PwaRegister.tsx`), so it doesn't interfere with dev-mode hot reload.
 
@@ -94,7 +96,6 @@ Built with **Claude Code** (Sonnet 5) as the implementation tool, directed inter
 
 ## What I'd improve with more time
 
-- **LLM-generated match explanations.** The "Why this matches" card currently shows three deterministic sub-scores (sector/region/deal-size fit) as bars. The natural next step is a real LLM call that turns the buyer profile + listing into a one- or two-sentence rationale ("Fits because you're looking for recurring-revenue SaaS in North America, and this one has 90% net revenue retention with a founder seeking a full exit") — genuine AI reasoning layered on top of the deterministic score, not just another weighted feature.
 - **Semantic matching via embeddings.** Sector/region matching today is an exact-key match, so a buyer thesis written as "vertical SaaS for logistics" won't match a listing described as "niche software platform for freight operators" even though they're a strong fit. Embedding `investmentThesis` and `description`, then blending cosine similarity into the existing score, would catch fits the categorical fields miss — a meaningfully different matching approach from rule-based weights, not just a bigger version of the same thing.
 - **LLM-powered natural-language search** ("SaaS companies in Europe under $10M") that parses free text into the existing filter set, layered on top of the deterministic match score.
 - **Blind/anonymized listings** — reveal seller identity only after both sides opt in, closer to real M&A marketplace conventions.
@@ -108,4 +109,4 @@ Built with **Claude Code** (Sonnet 5) as the implementation tool, directed inter
 pnpm test   # from repo root or apps/api — Vitest
 ```
 
-48 tests across four files, all without needing a live database: the match-score algorithm (perfect/zero/partial-credit/edge cases), zod schema validation for every request-body schema (including the `.strict()` mass-assignment guard and business rules like "MANAGER isn't a self-registerable role"), the pretty-URL slug helpers (`slugify` / `toSlugPath` / `idFromSlugPath`, including their round-trip), and authorization-guard behavior (401 unauthenticated, 403 wrong role) across every router. Route tests are deliberately scoped to paths that fail before touching Prisma — `requireAuth`/`requireRole` run ahead of any DB call on most routers, so the guard itself is what's under test, not a live connection.
+49 tests across four files, all without needing a live database: the match-score algorithm (perfect/zero/partial-credit/edge cases), zod schema validation for every request-body schema (including the `.strict()` mass-assignment guard and business rules like "MANAGER isn't a self-registerable role"), the pretty-URL slug helpers (`slugify` / `toSlugPath` / `idFromSlugPath`, including their round-trip), and authorization-guard behavior (401 unauthenticated, 403 wrong role) across every router. Route tests are deliberately scoped to paths that fail before touching Prisma — `requireAuth`/`requireRole` run ahead of any DB call on most routers, so the guard itself is what's under test, not a live connection.

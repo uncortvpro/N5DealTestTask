@@ -170,7 +170,9 @@ export default async function AssetDetailPage({ params }: { params: { slug: stri
             </CardBody>
           </Card>
 
-          {asset.matchBreakdown && <MatchBreakdownCard breakdown={asset.matchBreakdown} />}
+          {asset.matchBreakdown && (
+            <MatchBreakdownCard breakdown={asset.matchBreakdown} assetId={asset.id} />
+          )}
         </div>
 
         <div className="space-y-6">

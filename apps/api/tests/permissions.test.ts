@@ -80,4 +80,9 @@ describe("authorization guards", () => {
       .set("Cookie", sessionCookie(7, "SELLER"));
     expect(res.status).toBe(403);
   });
+
+  it("rejects an unauthenticated request for a match explanation with 401", async () => {
+    const res = await request(app).get("/api/assets/1/match-explanation");
+    expect(res.status).toBe(401);
+  });
 });
